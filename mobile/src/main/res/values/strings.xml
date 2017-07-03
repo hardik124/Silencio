@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Silencio</string>
     <string name="action_settings">Settings</string>
+    <string name="location_permission">Location permission</string>
+    <string name="ringer_permission">Ringer Permission</string>
+    <string name="enable_geofences">Enable Geofences</string>
+    <string name="click_to_add_more_places">Click to add more places</string>
 </resources>
