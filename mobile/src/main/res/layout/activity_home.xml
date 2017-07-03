@@ -10,114 +10,116 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-    </android.support.design.widget.AppBarLayout>
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:textSize="18sp"
-    android:text="Settings"
-    android:padding="8dp"
-    android:layout_marginLeft="4dp"
-    android:layout_marginTop="16dp"
-    android:textColor="@color/colorPrimaryDark" />
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="16dp"
+            android:padding="8dp"
+            android:text="Settings"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/colorPrimaryDark">
-        </View>
+            android:background="@color/colorPrimaryDark"></View>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:weightSum="1"
+                android:orientation="horizontal"
                 android:padding="8dp"
-                android:orientation="horizontal">
+                android:weightSum="1">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:contentDescription="@string/enable_geofences"
-                    android:layout_weight="1"
                     android:layout_gravity="fill_vertical"
-                    android:textSize="16sp"
                     android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/enable_geofences"
+                    android:text="@string/enable_geofences"
                     android:textColor="@android:color/black"
-                    android:text="@string/enable_geofences"/>
+                    android:textSize="16sp" />
 
                 <android.support.v7.widget.SwitchCompat
                     android:id="@+id/geofences_switch"
-                    android:contentDescription="@string/enable_geofences"
-                    android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
+                    android:contentDescription="@string/enable_geofences" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:weightSum="1"
+                android:orientation="horizontal"
                 android:padding="8dp"
-                android:orientation="horizontal">
+                android:weightSum="1">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:contentDescription="@string/location_permission"
-                    android:layout_weight="1"
                     android:layout_gravity="fill_vertical"
-                    android:textSize="16sp"
                     android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/location_permission"
+                    android:text="@string/location_permission"
                     android:textColor="@android:color/black"
-                    android:text="@string/location_permission"/>
+                    android:textSize="16sp" />
 
                 <CheckBox
                     android:id="@+id/location_permissionCB"
-                    android:contentDescription="@string/location_permission"
-                    android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
+                    android:contentDescription="@string/location_permission" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:weightSum="1"
+                android:orientation="horizontal"
                 android:padding="8dp"
-                android:orientation="horizontal">
+                android:weightSum="1">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:contentDescription="@string/ringer_permission"
-                    android:layout_weight="1"
                     android:layout_gravity="fill_vertical"
-                    android:textSize="16sp"
-                    android:textColor="@android:color/black"
                     android:layout_marginTop="10dp"
-                    android:text="@string/ringer_permission"/>
+                    android:layout_weight="1"
+                    android:contentDescription="@string/ringer_permission"
+                    android:text="@string/ringer_permission"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp" />
 
                 <CheckBox
                     android:id="@+id/ringer_permissionCB"
-                    android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp" />
             </LinearLayout>
         </LinearLayout>
 
@@ -125,37 +127,36 @@
             android:id="@+id/addPlace"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:textColor="@android:color/white"
-            android:background="@color/colorPrimaryDark"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/click_to_add_more_places"/>
+            android:background="@color/colorPrimaryDark"
+            android:text="@string/click_to_add_more_places"
+            android:textColor="@android:color/white" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="Location"
-            android:padding="8dp"
             android:layout_marginLeft="4dp"
             android:layout_marginTop="5dp"
-            android:textColor="@color/colorPrimaryDark" />
+            android:padding="8dp"
+            android:text="Location"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/colorPrimaryDark">
-        </View>
+            android:background="@color/colorPrimaryDark"></View>
 
         <android.support.v7.widget.RecyclerView
-            android:layout_marginTop="10dp"
-            android:padding="8dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:padding="8dp">
 
         </android.support.v7.widget.RecyclerView>
-</LinearLayout>
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
