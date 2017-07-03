@@ -2,8 +2,11 @@ package hardik124.silencio;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -26,10 +29,17 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import hardik124.silencio.database.DB_Contract;
 
 public class Home extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -38,6 +48,7 @@ public class Home extends AppCompatActivity implements
     private static final String TAG = "Home Activity";
     private final int PLACE_PICKER_INTENT = 7;
     private final int LOCATION_PERMISSION = 8;
+    private GoogleApiClient mClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +80,7 @@ public class Home extends AppCompatActivity implements
         });
 
         setPermission();
-        GoogleApiClient client = new GoogleApiClient.Builder(this)
+        mClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
@@ -162,16 +173,33 @@ public class Home extends AppCompatActivity implements
 
             Toast.makeText(this, placeAddress, Toast.LENGTH_LONG).show();
 //
-//            // Insert a new place into DB
-//            ContentValues contentValues = new ContentValues();
-//            contentValues.put(PlaceContract.PlaceEntry.COLUMN_PLACE_ID, placeID);
-//            getContentResolver().insert(PlaceContract.PlaceEntry.CONTENT_URI, contentValues);
+            // Insert a new place into DB
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DB_Contract.PlacesTable.COLOUMN_PLACE_ID, placeID);
+            contentValues.put(DB_Contract.PlacesTable.COLOUMN_PLACE_Address,placeAddress);
+            contentValues.put(DB_Contract.PlacesTable.COLOUMN_PLACE_Name,placeName);
+            getContentResolver().insert(DB_Contract.PlacesTable.CONTENT_URI, contentValues);
 //
 //            // Get live data information
 //            refreshPlacesData();
         }
     }
 
+
+    public void refreshPlacesData()
+    {
+        Uri place = DB_Contract.PlacesTable.CONTENT_URI;
+        Cursor data = getContentResolver().query(place,null,null,null,null);
+
+        if(data == null||data.getCount()==0)
+            return;
+        ArrayList<String> ids = new ArrayList<String>();
+
+        while (data.moveToNext())
+            ids.add(data.getString(data.getColumnIndex(DB_Contract.PlacesTable.COLOUMN_PLACE_ID)));
+        PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi.getPlaceById(mClient,ids.toArray(new String[ids.size()]));
+
+    }
     //Google API methods........................
 
     @Override
