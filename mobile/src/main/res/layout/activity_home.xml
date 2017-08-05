@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/background"
     android:layout_height="match_parent"
     tools:context="hardik124.silencio.Home">
 
@@ -29,8 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
-            android:layout_marginTop="16dp"
-            android:padding="8dp"
+            android:layout_marginTop="8dp"
+            android:padding="4dp"
             android:text="Settings"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp" />
@@ -38,7 +39,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/colorPrimaryDark"></View>
+            android:background="@color/colorPrimaryDark"> </View>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,33 +57,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_vertical"
-                    android:layout_marginTop="10dp"
-                    android:layout_weight="1"
-                    android:contentDescription="@string/enable_geofences"
-                    android:text="@string/enable_geofences"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp" />
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/geofences_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:contentDescription="@string/enable_geofences" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="8dp"
-                android:weightSum="1">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="fill_vertical"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="4dp"
                     android:layout_weight="1"
                     android:contentDescription="@string/location_permission"
                     android:text="@string/location_permission"
@@ -108,7 +83,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_vertical"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="4dp"
                     android:layout_weight="1"
                     android:contentDescription="@string/ringer_permission"
                     android:text="@string/ringer_permission"
@@ -140,7 +115,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
             android:layout_marginTop="5dp"
-            android:padding="8dp"
+            android:padding="4dp"
             android:text="Location"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp" />
@@ -148,15 +123,31 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/colorPrimaryDark"></View>
+            android:background="@color/colorPrimaryDark">
 
-        <android.support.v7.widget.RecyclerView
+        </View>
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            android:padding="8dp">
+            android:layout_height="match_parent">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/places_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="4dp"
+                android:padding="4dp">
 
-        </android.support.v7.widget.RecyclerView>
+            </android.support.v7.widget.RecyclerView>
+
+            <ProgressBar
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/progBar"/>
+        </FrameLayout>
+
+
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

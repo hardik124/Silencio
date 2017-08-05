@@ -3,9 +3,12 @@ package hardik124.silencio;
 import android.Manifest;
 import android.app.NotificationManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +19,9 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,6 +37,8 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
@@ -37,7 +46,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import hardik124.silencio.database.DB_Contract;
 
@@ -48,7 +56,15 @@ public class Home extends AppCompatActivity implements
     private static final String TAG = "Home Activity";
     private final int PLACE_PICKER_INTENT = 7;
     private final int LOCATION_PERMISSION = 8;
+
+
     private GoogleApiClient mClient;
+    private ArrayList<places_model> placeList;
+    private RecyclerView placesRV;
+    private PlacesRV adapter;
+    private boolean mIsEnabled;
+    private GeoFencing mGeofencing;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +73,29 @@ public class Home extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Button addPlace = (Button) findViewById(R.id.addPlace);
+        placesRV = (RecyclerView) findViewById(R.id.places_rv);
+        placeList = new ArrayList<>();
+
+        setPermission();
+        mClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .enableAutoManage(this, this)
+                .build();
+        mGeofencing = new GeoFencing(this, mClient);
+
+        adapter = new PlacesRV(placeList,this);
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(false);
+        linearLayoutManager.setStackFromEnd(false);
+        placesRV.setLayoutManager(linearLayoutManager);
+        placesRV.setAdapter(adapter);
+
+
         addPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,23 +109,15 @@ public class Home extends AppCompatActivity implements
                         startActivityForResult(i, PLACE_PICKER_INTENT);
                     } catch (GooglePlayServicesRepairableException e) {
                         Log.e(TAG, String.format("GooglePlayServices Not Available [%s]", e.getMessage()));
-                    } catch (GooglePlayServicesNotAvailableException e) {
-                        Log.e(TAG, String.format("GooglePlayServices Not Available [%s]", e.getMessage()));
                     } catch (Exception e) {
                         Log.e(TAG, String.format("PlacePicker Exception: %s", e.getMessage()));
                     }
                 }
             }
         });
+        mIsEnabled = getSharedPreferences("Geofence",MODE_PRIVATE).getBoolean(getString(R.string.settings_enabled), false);
+        refreshPlacesData();
 
-        setPermission();
-        mClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .addApi(Places.GEO_DATA_API)
-                .enableAutoManage(this, this)
-                .build();
     }
 
     @Override
@@ -105,6 +136,7 @@ public class Home extends AppCompatActivity implements
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this,SettingsActivity.class));
             return true;
         }
 
@@ -124,12 +156,16 @@ public class Home extends AppCompatActivity implements
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationPermission.setChecked(true);
             locationPermission.setEnabled(false);
-        } else
+        } else {
             locationPermission.setChecked(false);
+            locationPermission.setEnabled(true);
+        }
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= 24 && !notificationManager.isNotificationPolicyAccessGranted())
+        if (Build.VERSION.SDK_INT >= 24 && !notificationManager.isNotificationPolicyAccessGranted()) {
             ringerPermission.setChecked(false);
+            ringerPermission.setEnabled(true);
+        }
         else {
             ringerPermission.setChecked(true);
             ringerPermission.setEnabled(false);
@@ -171,8 +207,6 @@ public class Home extends AppCompatActivity implements
             String placeAddress = place.getAddress().toString();
             String placeID = place.getId();
 
-            Toast.makeText(this, placeAddress, Toast.LENGTH_LONG).show();
-//
             // Insert a new place into DB
             ContentValues contentValues = new ContentValues();
             contentValues.put(DB_Contract.PlacesTable.COLOUMN_PLACE_ID, placeID);
@@ -181,46 +215,79 @@ public class Home extends AppCompatActivity implements
             getContentResolver().insert(DB_Contract.PlacesTable.CONTENT_URI, contentValues);
 //
 //            // Get live data information
-//            refreshPlacesData();
+            refreshPlacesData();
+
         }
     }
 
 
     public void refreshPlacesData()
     {
-        Uri place = DB_Contract.PlacesTable.CONTENT_URI;
-        Cursor data = getContentResolver().query(place,null,null,null,null);
+        final View mProg = findViewById(R.id.progBar);
+
+        final Uri tableUri = DB_Contract.PlacesTable.CONTENT_URI;
+        Cursor data = getContentResolver().query(tableUri,null,null,null,null);
 
         if(data == null||data.getCount()==0)
             return;
         ArrayList<String> ids = new ArrayList<String>();
 
-        while (data.moveToNext())
+        while (data.moveToNext()) {
             ids.add(data.getString(data.getColumnIndex(DB_Contract.PlacesTable.COLOUMN_PLACE_ID)));
+        }
+        if(ids.isEmpty())
+        {
+            mProg.setVisibility(View.INVISIBLE);
+            placesRV.setVisibility(View.VISIBLE);
+            data.close();
+            return;
+        }
+        mProg.setVisibility(View.VISIBLE);
+        placesRV.setVisibility(View.INVISIBLE);
         PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi.getPlaceById(mClient,ids.toArray(new String[ids.size()]));
+        placeResult.setResultCallback(new ResultCallback<PlaceBuffer>() {
+            @Override
+            public void onResult(@NonNull PlaceBuffer places) {
+                placeList.clear();
+                for(int i=0;i<places.getCount();i++)
+                {
+                    Place currentPlace = places.get(i);
+                    places_model item = new places_model();
+                    item.setAddress(currentPlace.getAddress().toString());
+                    item.setName(currentPlace.getName().toString());
+                    item.setKey(currentPlace.getId());
+
+                    placeList.add(item);
+                }
+
+                mGeofencing.updateGeofencesList(places);
+                if(mIsEnabled) mGeofencing.registerAllGeofences();
+                adapter.notifyDataSetChanged();
+                mProg.setVisibility(View.INVISIBLE);
+                placesRV.setVisibility(View.VISIBLE);
+            }
+        });
+        data.close();
+
 
     }
     //Google API methods........................
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        refreshPlacesData();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Toast.makeText(this, "Suspended", Toast.LENGTH_SHORT).show();
 
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Toast.makeText(this, "failed", Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
-
     }
 }
