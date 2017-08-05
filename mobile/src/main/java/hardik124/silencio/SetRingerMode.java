@@ -32,7 +32,7 @@ public class SetRingerMode extends IntentService {
             final int mode = extra.getInt("mode");
             NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (android.os.Build.VERSION.SDK_INT < 24 ||
-                    (android.os.Build.VERSION.SDK_INT >= 24 && !nm.isNotificationPolicyAccessGranted())) {
+                    (android.os.Build.VERSION.SDK_INT >= 24 && nm.isNotificationPolicyAccessGranted())) {
                 AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                 audioManager.setRingerMode(mode);
         }

@@ -41,18 +41,18 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         }
 
         // Get the transition type.
+        boolean vibrate = context.getSharedPreferences("GeofenceVibrate",context.MODE_PRIVATE).getBoolean(context.getString(R.string.settings_enabled), false);
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
-        // Check which transition type has triggered this event
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            setRingerMode(context, AudioManager.RINGER_MODE_SILENT);
+        Intent setMode = new Intent(context,SetRingerMode.class);
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER||geofenceTransition==Geofence.GEOFENCE_TRANSITION_DWELL) {
+            if(vibrate)
+                setMode.putExtra("mode",AudioManager.RINGER_MODE_VIBRATE);
+            else
+                setMode.putExtra("mode",AudioManager.RINGER_MODE_SILENT);
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            setRingerMode(context, AudioManager.RINGER_MODE_NORMAL);
-        } else {
-            // Log the error.
-            Log.e(TAG, String.format("Unknown transition : %d", geofenceTransition));
-            // No need to do anything else
-            return;
+            setMode.putExtra("mode",AudioManager.RINGER_MODE_NORMAL);
         }
+        context.startService(setMode);
         // Send the notification
         sendNotification(context, geofenceTransition);
     }
@@ -124,34 +124,5 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         Notification notification = builder.build();
         notification.flags |=Notification.FLAG_NO_CLEAR;
         mNotificationManager.notify(0, notification);
-    }
-
-    /**
-     * Changes the ringer mode on the device to either silent or back to normal
-     *
-     * @param context The context to access AUDIO_SERVICE
-     * @param mode    The desired mode to switch device to, can be AudioManager.RINGER_MODE_SILENT or
-     *                AudioManager.RINGER_MODE_NORMAL
-     */
-    private void setRingerMode(Context context, int mode) {
-
-    }
-
-     class setRingerMode extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Bundle extra = intent.getExtras();
-            if (extra == null )
-                return;
-            final int mode =  extra.getInt("mode");
-            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            // Check for DND permissions for API 24+
-            if (android.os.Build.VERSION.SDK_INT < 24 ||
-                    (android.os.Build.VERSION.SDK_INT >= 24 && !nm.isNotificationPolicyAccessGranted())) {
-                AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                audioManager.setRingerMode(mode);
-            }
-        }
     }
 }
