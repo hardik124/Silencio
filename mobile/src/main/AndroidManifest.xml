@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <application
         android:allowBackup="true"
@@ -33,13 +34,20 @@
         </activity>
 
         <receiver android:name=".GeofenceBroadcastReceiver" />
-        <receiver android:name=".onBootReciever"
+        <receiver
+            android:name=".onBootReciever"
             android:enabled="true" />
-
 
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"> </activity>
+            android:label="@string/title_activity_settings" />
+
+        <service
+            android:name=".ActivityService"
+            android:exported="false" />
+        <service
+            android:name=".SetRingerMode"
+            android:exported="false"></service>
     </application>
 
 </manifest>
