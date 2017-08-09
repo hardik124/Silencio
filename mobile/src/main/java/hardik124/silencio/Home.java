@@ -4,10 +4,13 @@ import android.Manifest;
 import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -18,6 +21,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -38,8 +42,13 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
@@ -55,7 +64,7 @@ public class Home extends AppCompatActivity implements
 
     private static final String TAG = "Home Activity";
     private final int PLACE_PICKER_INTENT = 7;
-    private final int LOCATION_PERMISSION = 8;
+    private final int LOCATION_PERMISSION = 8,REQUEST_CHECK_SETTINGS=9;
 
 
     private GoogleApiClient mClient;
@@ -81,9 +90,56 @@ public class Home extends AppCompatActivity implements
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
+                .addApi(ActivityRecognition.API)
                 .addApi(Places.GEO_DATA_API)
                 .enableAutoManage(this, this)
                 .build();
+//
+//        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//
+//        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//                builder.setMessage("Your GPS seems to be disabled, please enable it?")
+//                        .setCancelable(false)
+//                        .setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
+//                            public void onClick(final DialogInterface dialog, final int id) {
+//                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+//                            }
+//                        })
+//                        .setNegativeButton("No", null);
+//                final AlertDialog alert = builder.create();
+//                alert.show();
+//            }
+//        }
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(30 * 1000);
+        locationRequest.setFastestInterval(5 * 1000);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+
+        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
+
+                        try {
+                            // Show the dialog by calling startResolutionForResult(), and check the result
+                            // in onActivityResult().
+                            status.startResolutionForResult(Home.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                        }
+                        break;
+                }
+            }
+        });
         mGeofencing = new GeoFencing(this, mClient);
 
         adapter = new PlacesRV(placeList,this);
@@ -215,6 +271,7 @@ public class Home extends AppCompatActivity implements
             getContentResolver().insert(DB_Contract.PlacesTable.CONTENT_URI, contentValues);
 //
 //            // Get live data information
+            mGeofencing.registerAllGeofences();
             refreshPlacesData();
 
         }

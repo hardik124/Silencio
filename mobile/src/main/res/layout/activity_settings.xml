@@ -33,6 +33,44 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:contentDescription="@string/enable_geofences" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:contentDescription="@string/enable_geofences"
+            android:padding="8dp"
+            android:text="Turns on  silent mode when in placed picked by the user ,"
+            android:textColor="@color/text"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill_vertical"
+                android:layout_marginTop="4dp"
+                android:layout_weight="1"
+                android:contentDescription="@string/enable_geofences"
+                android:text="Vibrate instead of silent mode"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/vibrate"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:contentDescription="@string/enable_geofences" />
         </LinearLayout>
 
         <TextView
@@ -41,7 +79,7 @@
             android:layout_marginTop="4dp"
             android:contentDescription="@string/enable_geofences"
             android:padding="8dp"
-            android:text="Makes phone silent when in placed picked by the user ,"
+            android:text="Uses vibrate mode instead of silent"
             android:textColor="@color/text"
             android:textSize="16sp" />
 
@@ -125,7 +163,8 @@
             android:layout_marginTop="4dp"
             android:contentDescription="@string/enable_geofences"
             android:padding="8dp"
-            android:text="Driving right now , Call you later ?"
+            android:id="@+id/rejectText"
+            android:text="@string/default_text"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
     </LinearLayout>
