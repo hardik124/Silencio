@@ -15,7 +15,7 @@ import java.util.Date;
 public class CallReciever extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (context.getSharedPreferences("Driving", context.MODE_PRIVATE).getBoolean(context.getString(R.string.settings_enabled), false)) {
+        if (context.getSharedPreferences("Activity", context.MODE_PRIVATE).getBoolean("ActivityEnabled", false)) {
             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
             if (stateStr == null)
                 return;
@@ -48,7 +48,7 @@ public class CallReciever extends BroadcastReceiver {
                 SharedPreferences.Editor editor = context.getSharedPreferences("Driving", context.MODE_PRIVATE).edit();
                 editor.putString("number", number);
                 Log.d("driving", number);
-                editor.commit();
+                editor.apply();
             }
         }
     }
