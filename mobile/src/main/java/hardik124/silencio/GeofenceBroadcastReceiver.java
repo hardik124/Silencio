@@ -140,6 +140,6 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         // Issue the notification
         Notification notification = builder.build();
         notification.flags |=Notification.FLAG_NO_CLEAR;
-        mNotificationManager.notify(0, notification);
+        mNotificationManager.notify(1, notification);
     }
 }

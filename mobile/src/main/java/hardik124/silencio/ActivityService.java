@@ -47,11 +47,17 @@ public class ActivityService extends IntentService {
         if(activity.getConfidence()<90)
             return;
         int type = activity.getType();
+
         if (type == DetectedActivity.IN_VEHICLE) {
+
             Intent setMode = new Intent(this, SetRingerMode.class);
             setMode.putExtra("mode", AudioManager.RINGER_MODE_SILENT);
             notificationCreator(AudioManager.RINGER_MODE_SILENT);
-            Log.d("act","Driv");
+
+            SharedPreferences.Editor editor = getSharedPreferences("Activity", MODE_PRIVATE).edit();
+            editor.putBoolean("ActivityEnabled",true);
+            editor.apply();
+
             startService(setMode);
 
         }
@@ -62,18 +68,33 @@ public class ActivityService extends IntentService {
             if (!geofence) {
                 Intent setMode = new Intent(this, SetRingerMode.class);
                 setMode.putExtra("mode", AudioManager.RINGER_MODE_VIBRATE);
+
                 notificationCreator(AudioManager.RINGER_MODE_VIBRATE);
-                Log.d("act","bic/rn");
+
+                SharedPreferences.Editor editor = getSharedPreferences("Activity", MODE_PRIVATE).edit();
+                editor.putBoolean("ActivityEnabled",true);
+                editor.apply();
+
                 startService(setMode);
             }
         }
 
-        if (type == DetectedActivity.STILL) {
+        else {
             SharedPreferences pref = getSharedPreferences("Geofence", MODE_PRIVATE);
             boolean geofence = pref.getBoolean("isEnabledNow", false);
-            if (!geofence) {
+
+            pref = getSharedPreferences("Activity", MODE_PRIVATE);
+            boolean activityEnabled=  pref.getBoolean("ActivityEnabled",false);
+
+
+            if(activityEnabled&&!geofence) {
+                pref.edit().putBoolean("ActivityEnabled",false).apply();
                 Intent setMode = new Intent(this, SetRingerMode.class);
                 setMode.putExtra("mode", AudioManager.RINGER_MODE_NORMAL);
+
+                NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.cancel(0);
+
                 startService(setMode);
             }
         }
