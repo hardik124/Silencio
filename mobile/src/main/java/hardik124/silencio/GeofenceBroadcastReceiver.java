@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.Build;
@@ -41,7 +42,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         }
 
         // Get the transition type.
-        boolean vibrate = context.getSharedPreferences("GeofenceVibrate",context.MODE_PRIVATE).getBoolean(context.getString(R.string.settings_enabled), false);
+        boolean vibrate = context.getSharedPreferences("Geofence",context.MODE_PRIVATE).getBoolean("Vibrate", false);
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         Intent setMode = new Intent(context,SetRingerMode.class);
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER||geofenceTransition==Geofence.GEOFENCE_TRANSITION_DWELL) {
@@ -49,8 +50,15 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
                 setMode.putExtra("mode",AudioManager.RINGER_MODE_VIBRATE);
             else
                 setMode.putExtra("mode",AudioManager.RINGER_MODE_SILENT);
+
+            SharedPreferences.Editor editor = context.getSharedPreferences("Geofence", context.MODE_PRIVATE).edit();
+            editor.putBoolean("isEnabledNow", true);
+            editor.apply();
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             setMode.putExtra("mode",AudioManager.RINGER_MODE_NORMAL);
+            SharedPreferences.Editor editor = context.getSharedPreferences("Geofence", context.MODE_PRIVATE).edit();
+            editor.putBoolean("isEnabledNow", false);
+            editor.apply();
         }
         context.startService(setMode);
         // Send the notification
@@ -90,12 +98,21 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         // Check the transition type to display the relevant icon image
 
 
-        if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            builder.setSmallIcon(R.drawable.ic_volume_off_white_24dp)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+        if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER||transitionType ==Geofence.GEOFENCE_TRANSITION_DWELL) {
+            boolean vibrate = context.getSharedPreferences("GeofenceVibrate",context.MODE_PRIVATE).getBoolean(context.getString(R.string.settings_enabled), false);
+            if(!vibrate)
+                    builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
                             R.drawable.ic_volume_off_white_24dp))
-                    .setAutoCancel(false)
+                            .setSmallIcon(R.drawable.ic_volume_off_white_24dp);
+
+            else
+                builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                        R.drawable.ic_vibrate))
+                        .setSmallIcon(R.drawable.ic_vibrate);
+
+            builder.setAutoCancel(false)
                     .setContentTitle(context.getString(R.string.silent_mode_activated));
+
         } else// if (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT)
              {
             builder.setSmallIcon(R.drawable.ic_volume_up_white_24dp)
