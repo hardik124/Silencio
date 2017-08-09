@@ -1,9 +1,5 @@
 package hardik124.silencio;
 
-/**
- * Created by sid319 on 3/7/17.
- */
-
 public class places_model {
 
     private String name,address,key;

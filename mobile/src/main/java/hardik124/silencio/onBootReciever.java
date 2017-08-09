@@ -17,21 +17,7 @@ public class onBootReciever extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (intent.getAction().equalsIgnoreCase(Intent.ACTION_BOOT_COMPLETED)) {
-            GoogleApiClient client = new GoogleApiClient.Builder(context)
-                    .addApi(LocationServices.API)
-                    .addApi(Places.GEO_DATA_API)
-                    .addApi(ActivityRecognition.API)
-                    .build();
+        context.startActivity(new Intent(context,StarterService.class));
 
-            GeoFencing  geoFencing = new GeoFencing(context,client);
-            geoFencing.registerAllGeofences();
-
-            boolean mIsEnabled = context.getSharedPreferences("Geofence",MODE_PRIVATE).getBoolean(context.getString(R.string.settings_enabled), false);
-            if(mIsEnabled)
-                geoFencing.registerAllGeofences();
-            else
-                geoFencing.unsRegisterAllGeofences();
-        }
     }
 }
